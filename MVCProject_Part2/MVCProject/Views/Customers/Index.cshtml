@@ -1,0 +1,261 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Manger Customers</h2>
+<form class="form-horizontal">
+    <div class="form-group">
+        <label class="col-md-6">CustomerID</label>
+        <input type="text" class="form-control col-md-6 customerid" />
+    </div>
+    <div class="form-group">
+        <label class="col-md-6">CompanyName</label>
+        <input type="text" class="form-control col-md-6 companyname" />
+    </div>
+    <div class="form-group">
+        <label class="col-md-6">ContactName</label>
+        <input type="text" class="form-control col-md-6 contactname" />
+    </div>
+    <div class="form-group">
+        <label class="col-md-6">ContactTitle</label>
+        <input type="text" class="form-control col-md-6 contacttitle" />
+    </div>
+    <div class="form-group">
+        <label class="col-md-6">Address</label>
+        <input type="text" class="form-control col-md-6 address" />
+    </div>
+    <div class="form-group">
+        <label class="col-md-6">City</label>
+        <input type="text" class="form-control col-md-6 city" />
+    </div>
+    <div class="form-group">
+        <label class="col-md-6">Region</label>
+        <input type="text" class="form-control col-md-6 region" />
+    </div>
+    <div class="form-group">
+        <label class="col-md-6">PostalCode</label>
+        <input type="text" class="form-control col-md-6 postalcode" />
+    </div>
+    <div class="form-group">
+        <label class="col-md-6">Country</label>
+        <input type="text" class="form-control col-md-6 country" />
+    </div>
+    <div class="form-group">
+        <label class="col-md-6">Phone</label>
+        <input type="text" class="form-control col-md-6 phone" />
+    </div>
+    <div class="form-group">
+        <label class="col-md-6">Fax</label>
+        <input type="text" class="form-control col-md-6 fax" />
+    </div>
+    <div class="form-group">
+        <input type="button" class="btn btn-danger btn-addnew" value="Add" />
+    </div>
+</form>
+
+<table class="table coustomers-list">
+    <thead>
+        <tr>
+            <th>Edit / Delete</th>
+            <th>CustomerID</th>
+            <th>CompanyName</th>
+            <th>ContactName</th>
+            <th>ContactTitle</th>
+            <th>Address</th>
+            <th>City</th>
+            <th>Region</th>
+            <th>PostalCode</th>
+            <th>Country</th>
+            <th>Phone</th>
+            <th>Fax</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+@*js*@
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script>
+    $(document).ready(function () {
+
+        // Get AllCustomers
+        GetAllCustomers();
+
+        $(".btn-addnew").on("click", function (event) {
+            event.preventDefault();
+            var customerId = $(".customerid").val().trim(),
+                companyname = $(".companyname").val().trim(),
+                contactname = $(".contactname").val().trim(),
+                contacttitle = $(".contacttitle").val().trim(),
+                address = $(".address").val().trim(),
+                city = $(".city").val().trim(),
+                region = $(".region").val().trim(),
+                postalcode = $(".postalcode").val().trim(),
+                country = $(".country").val().trim(),
+                phone = $(".phone").val().trim(),
+                fax = $(".fax").val().trim();
+
+            //validation
+            if (customerId === "") {
+                alert("please enter customerid");
+                return;
+            }
+
+            //call ajax
+            var CustomerVO = new Object();
+            CustomerVO.CustomerID = customerId;
+            CustomerVO.CompanyName = companyname;
+            CustomerVO.ContactName = contactname;
+            CustomerVO.ContactTitle = contacttitle;
+            CustomerVO.Address = address;
+            CustomerVO.City = city;
+            CustomerVO.Region = region;
+            CustomerVO.PostalCode = postalcode;
+            CustomerVO.Country = country;
+            CustomerVO.Phone = phone;
+            CustomerVO.Fax = fax;
+            $.ajax({
+                url: '/Customers/Addnew',
+                type: "POST",
+                data: JSON.stringify(CustomerVO),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data === 1) {
+                        alert("add new success");
+                    }
+                    else {
+                        alert("Edit success");
+                    }
+                    clearform();
+                    //load data
+                    GetAllCustomers();
+                }
+            });
+        });
+
+        //check exit
+        $(".customerid").on("change", function (event) {
+            event.preventDefault();
+            var customerid = $(this).val().trim();
+            if (customerid !== "") {
+                $.ajax({
+                    url: '/Customers/CheckCustomerId',
+                    Type: "GET",
+                    data: { CustomerId: customerid },
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data === true) {
+                            alert("customer is exit!");
+                            $(".btn-addnew").attr("disabled", "disabled");
+                        }
+                        else {
+                            $(".btn-addnew").removeAttr("disabled");
+                        }
+                    }
+                });
+            }
+        });
+
+    });
+
+    function clearform() {
+       $(".customerid").val(""),
+       $(".companyname").val(""),
+       $(".contactname").val(""),
+       $(".contacttitle").val(""),
+       $(".address").val(""),
+       $(".city").val(""),
+       $(".region").val(""),
+       $(".postalcode").val(""),
+       $(".country").val(""),
+       $(".phone").val(""),
+       $(".fax").val("");
+    }
+
+    function GetAllCustomers() {
+        $.ajax({
+            Type: "GET",
+            url: '/Customers/GetAllCustomers',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (data != null) {
+                    var html = "";
+                    $.each(data, function (k, v) {
+                        html += "<tr>";
+                        html += '<td><input type="button" class="btn btn-warning btn-Edit" value="Edit" /> | <input type="button" class="btn btn-danger btn-del" value="Del" /></td>'
+                        html += "<td>" + v.CustomerID + "</td>";
+                        html += "<td>" + v.CompanyName + "</td>";
+                        html += "<td>" + v.ContactName + "</td>";
+                        html += "<td>" + v.ContactTitle + "</td>";
+                        html += "<td>" + v.Address + "</td>";
+                        html += "<td>" + v.City + "</td>";
+                        html += "<td>" + v.Region + "</td>";
+                        html += "<td>" + v.PostalCode + "</td>";
+                        html += "<td>" + v.Country + "</td>";
+                        html += "<td>" + v.Phone + "</td>";
+                        html += "<td>" + v.Fax + "</td>";
+                    });
+                    $(".coustomers-list").find("tbody").html(html);
+
+                    //bin event btn-edit
+                    binevent();
+                    bineventdel();
+                }
+            }
+        });
+    }
+
+    //edit
+    function binevent() {
+        $(".btn-Edit").on("click", function (event) {
+            event.preventDefault();
+            var obj = $(this).closest("tr");
+                $(".customerid").val(obj.find("td:eq(1)").html().trim()),
+                $(".companyname").val(obj.find("td:eq(2)").html().trim()),
+                $(".contactname").val(obj.find("td:eq(3)").html().trim()),
+                $(".contacttitle").val(obj.find("td:eq(4)").html().trim()),
+                $(".address").val(obj.find("td:eq(5)").html().trim()),
+                $(".city").val(obj.find("td:eq(6)").html().trim()),
+                $(".region").val(obj.find("td:eq(7)").html().trim()),
+                $(".postalcode").val(obj.find("td:eq(8)").html().trim()),
+                $(".country").val(obj.find("td:eq(9)").html().trim()),
+                $(".phone").val(obj.find("td:eq(10)").html().trim()),
+                $(".fax").val(obj.find("td:eq(11)").html().trim());
+                $(".btn-addnew").val("Add");
+
+                ////load data
+                //GetAllCustomers();
+                //$(".btn-addnew").val("Add");
+        });
+    }
+
+    //del
+    function bineventdel() {
+        $(".btn-del").on("click", function (event) {
+            event.preventDefault();
+            var obj = $(this).closest("tr");
+            if (confirm("are you sure del?")) {
+                $.ajax({
+                    url: '/Customers/Delete',
+                    Type: "GET",
+                    data: { CustomerId: obj.find("td:eq(1)").html().trim()},
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data != null) {
+                            alert("del success");
+
+                            //load data
+                            GetAllCustomers();
+                        }
+                    }
+                });
+            }
+        });
+    }
+</script>

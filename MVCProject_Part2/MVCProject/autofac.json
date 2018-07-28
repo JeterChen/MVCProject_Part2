@@ -1,0 +1,7 @@
+{
+  "modules": [
+    {
+      "type": "MVCProject.Service.DomainModelModule, MVCProject.Service"
+    }
+  ]
+}
